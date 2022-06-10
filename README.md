@@ -6,7 +6,7 @@
 ## 依赖
 
 - torch >= 1.8
-- hfai
+- [hfai](https://doc.hfai.high-flyer.cn/index.html)
 - [ffrecord](https://github.com/HFAiLab/ffrecord/)
 
 ## 模型列表
