@@ -60,3 +60,9 @@ Tags:
     | name         | maintainer                                    | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
     |--------------|-----------------------------------------------|------------------|-----------|----------------|
     | [BERT](bert) | @hfai                                         | Yes              | Yes       | Yes            |
+
+7. 气象预测
+
+    | name                                                   | maintainer                             | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
+    |--------------------------------------------------------|----------------------------------------|------------------|-----------|----------------|
+    | [FourCastNet](https://github.com/HFAiLab/FourCastNet)  | [@wenjie](https://github.com/VachelHU) | Yes              | No        | Yes            |
