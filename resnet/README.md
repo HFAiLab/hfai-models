@@ -8,7 +8,7 @@
 
 - torch >= 1.8
 - torchvision
-- hfai (to be released soon)
+- [hfai](https://doc.hfai.high-flyer.cn/index.html)
 - [ffrecord](https://github.com/HFAiLab/ffrecord/)
 
 ## Train
