@@ -6,7 +6,7 @@ from torch.nn.parallel import DistributedDataParallel as TorchDDP
 from hfai.nn.parallel import DistributedDataParallel as HfaiDDP
 from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 import timm.optim
 
 import hfai
