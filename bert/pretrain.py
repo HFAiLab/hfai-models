@@ -23,7 +23,7 @@ args = parser.parse_args()
 class Trainer:
     def __init__(self, model, lr, warmup, batch_size, epochs, vocab_size, save_path, log_path):
         super().__init__()
-        self.steps = 0
+        self.steps = 1
         self.model = model
         self.batch_size = batch_size
         self.vocab_size = vocab_size
