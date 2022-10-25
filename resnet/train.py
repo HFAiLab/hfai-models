@@ -11,6 +11,7 @@ from torchvision import transforms, models
 import hfai
 import hfai.distributed as dist
 dist.set_nccl_opt_level(dist.HFAI_NCCL_OPT_LEVEL.AUTO)
+hfai.nn.functional.set_replace_torch()
 
 
 def train(dataloader, model, criterion, optimizer, epoch, local_rank, start_step, best_acc):
