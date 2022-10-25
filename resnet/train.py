@@ -10,6 +10,7 @@ from torchvision import transforms, models
 
 import hfai
 import hfai.distributed as dist
+dist.set_nccl_opt_level(dist.HFAI_NCCL_OPT_LEVEL.AUTO)
 
 
 def train(dataloader, model, criterion, optimizer, epoch, local_rank, start_step, best_acc):
@@ -79,7 +80,8 @@ def main(local_rank):
     torch.cuda.set_device(local_rank)
 
     # 模型、数据、优化器
-    model = models.resnet50()
+    model = models.resnet50().cuda()
+    model = hfai.nn.to_hfai(model)
     model = DistributedDataParallel(model.cuda(), device_ids=[local_rank])
 
     train_transform = transforms.Compose([
@@ -133,4 +135,4 @@ def main(local_rank):
 
 if __name__ == '__main__':
     ngpus = torch.cuda.device_count()
-    torch.multiprocessing.spawn(main, args=(), nprocs=ngpus)
+    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus)
