@@ -148,4 +148,4 @@ def pretrain(local_rank):
 
 
 if __name__ == "__main__":
-    torch.multiprocessing.spawn(pretrain, args=(), nprocs=torch.cuda.device_count())
+    hfai.multiprocessing.spawn(pretrain, args=(), nprocs=torch.cuda.device_count())

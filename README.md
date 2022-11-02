@@ -6,7 +6,7 @@
 ## 依赖
 
 - torch >= 1.8
-- hfai
+- [hfai](https://doc.hfai.high-flyer.cn/index.html)
 - [ffrecord](https://github.com/HFAiLab/ffrecord/)
 
 ## 模型列表
@@ -27,9 +27,10 @@ Tags:
 
 2. 自动驾驶
 
-    | name                                            | maintainer                                | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
-    |-------------------------------------------------|-------------------------------------------|------------------|-----------|----------------|
-    | [HDMapNet](https://github.com/HFAiLab/hdmapnet) | [@bixiao](https://github.com/Freja71122)  | No               | No        | Yes            |
+    | name                                              | maintainer                                | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
+    |---------------------------------------------------|-------------------------------------------|------------------|-----------|----------------|
+    | [HDMapNet](https://github.com/HFAiLab/hdmapnet)   | [@bixiao](https://github.com/Freja71122)  | No               | No        | Yes            |
+    | [BEVFormer](https://github.com/HFAiLab/BEVFormer) | [@bixiao](https://github.com/Freja71122)  | Yes              | No        | Yes            |
 
 
 3. 时间序列
@@ -60,3 +61,16 @@ Tags:
     | name         | maintainer                                    | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
     |--------------|-----------------------------------------------|------------------|-----------|----------------|
     | [BERT](bert) | @hfai                                         | Yes              | Yes       | Yes            |
+
+7. 气象预测
+
+    | name                                                   | maintainer                             | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
+    |--------------------------------------------------------|----------------------------------------|------------------|-----------|----------------|
+    | [FourCastNet](https://github.com/HFAiLab/FourCastNet)  | [@wenjie](https://github.com/VachelHU) | Yes              | No        | Yes            |
+
+8. 图神经网络
+
+    | name                                                         | maintainer                             | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
+    |--------------------------------------------------------------|----------------------------------------|------------------|-----------|----------------|
+    | [DeepGCNs](https://github.com/HFAiLab/Distributed-DeepGCNs)  | [@wenjie](https://github.com/VachelHU) | Yes              | Yes       | Yes            |
+

@@ -272,4 +272,4 @@ def main(local_rank):
 
 if __name__ == "__main__":
     ngpus = torch.cuda.device_count()
-    torch.multiprocessing.spawn(main, args=(), nprocs=ngpus)
+    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus)

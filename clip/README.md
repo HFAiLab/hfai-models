@@ -7,7 +7,7 @@
 ## Requirements
 
 - torch >= 1.8
-- hfai (to be released soon)
+- [hfai](https://doc.hfai.high-flyer.cn/index.html)
 - [ffrecord](https://github.com/HFAiLab/ffrecord/)
 
 ## Train
