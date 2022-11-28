@@ -16,6 +16,7 @@ Tags:
 - `hfai.nn.to_hfai`: 是否使用了算子加速
 - `hfai DDP`: 是否使用了 HFAI DDP 加速
 - `hfai.datasets`: 是否使用了 HFAI 数据仓库
+- `haiscale`: 是否使用了 haiscale 并行训练库
 
 
 1. 生物计算
@@ -61,6 +62,10 @@ Tags:
     | name         | maintainer                                    | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
     |--------------|-----------------------------------------------|------------------|-----------|----------------|
     | [BERT](bert) | @hfai                                         | Yes              | Yes       | Yes            |
+
+    | name         | maintainer                                    | haiscale         |
+    |--------------|-----------------------------------------------|------------------|
+    | [GPT2](gpt)  | [@chengqi](https://github.com/KinglittleQ)    | Yes              |
 
 7. 气象预测
 
