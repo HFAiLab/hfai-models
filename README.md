@@ -71,7 +71,7 @@ Tags:
 
     | name                                                   | maintainer                             | hfai.nn.to_hfai  | hfai DDP  | hfai.datasets  |
     |--------------------------------------------------------|----------------------------------------|------------------|-----------|----------------|
-    | [FourCastNet](https://github.com/HFAiLab/FourCastNet)  | [@wenjie](https://github.com/VachelHU) | Yes              | No        | Yes            |
+    | [OpenCastKit](https://github.com/HFAiLab/OpenCastKit)  | [@wenjie](https://github.com/VachelHU) | Yes              | Yes       | Yes            |
 
 8. 图神经网络
 
