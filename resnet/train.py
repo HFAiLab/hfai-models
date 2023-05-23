@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import torch
 from torch import nn
-from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 from torch.optim import SGD
 from torch.optim.lr_scheduler import StepLR
@@ -10,6 +9,8 @@ from torchvision import transforms, models
 
 import hfai
 import hfai.distributed as dist
+from hfai.datasets import ImageNet
+from haiscale.ddp import DistributedDataParallel
 dist.set_nccl_opt_level(dist.HFAI_NCCL_OPT_LEVEL.AUTO)
 hfai.nn.functional.set_replace_torch()
 
@@ -92,7 +93,7 @@ def main(local_rank):
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
     ])  # 定义训练集变换
-    train_dataset = hfai.datasets.ImageNet('train', transform=train_transform)
+    train_dataset = ImageNet('train', transform=train_transform)
     train_datasampler = DistributedSampler(train_dataset)
     train_dataloader = train_dataset.loader(batch_size, sampler=train_datasampler, num_workers=4, pin_memory=True)
 
@@ -103,7 +104,7 @@ def main(local_rank):
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
     ])  # 定义测试集变换
-    val_dataset = hfai.datasets.ImageNet('val', transform=val_transform)
+    val_dataset = ImageNet('val', transform=val_transform)
     val_datasampler = DistributedSampler(val_dataset)
     val_dataloader = val_dataset.loader(batch_size, sampler=val_datasampler, num_workers=4, pin_memory=True)
 
@@ -136,4 +137,4 @@ def main(local_rank):
 
 if __name__ == '__main__':
     ngpus = torch.cuda.device_count()
-    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus)
+    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus, bind_numa=True)

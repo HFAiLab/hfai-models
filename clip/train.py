@@ -6,7 +6,7 @@ plt.switch_backend("agg")
 import torch
 import torch.nn as nn
 from torch.nn.parallel import DistributedDataParallel as TorchDDP
-from hfai.nn.parallel import DistributedDataParallel as HfaiDDP
+from haiscale.ddp import DistributedDataParallel as HfaiDDP
 
 from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
@@ -272,4 +272,4 @@ def main(local_rank):
 
 if __name__ == "__main__":
     ngpus = torch.cuda.device_count()
-    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus)
+    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus, bind_numa=True)

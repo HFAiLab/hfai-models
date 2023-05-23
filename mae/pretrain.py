@@ -2,12 +2,13 @@ from argparse import ArgumentParser
 import math
 from pathlib import Path
 import torch
-from torch.nn.parallel import DistributedDataParallel as TorchDDP
-from hfai.nn.parallel import DistributedDataParallel as HfaiDDP
 from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
 from torch.utils.tensorboard import SummaryWriter
 import timm.optim
+
+from torch.nn.parallel import DistributedDataParallel as TorchDDP
+from haiscale.ddp import DistributedDataParallel as HfaiDDP
 
 import hfai
 import hfai.distributed as dist
@@ -164,4 +165,4 @@ def main(local_rank):
 
 if __name__ == "__main__":
     ngpus = torch.cuda.device_count()
-    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus)
+    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus, bind_numa=True)

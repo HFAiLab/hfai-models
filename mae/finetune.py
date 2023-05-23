@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import numpy as np
 import torch
-from hfai.nn.parallel import DistributedDataParallel
+from haiscale.ddp import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
 from tensorboardX import SummaryWriter
@@ -16,7 +16,6 @@ import hfai
 import hfai.distributed as dist
 
 from hfai.datasets import ImageNet
-from ffrecord.torch import DataLoader
 
 import lr_decay as lrd
 import mae
@@ -258,4 +257,4 @@ def main(local_rank):
 
 if __name__ == "__main__":
     ngpus = torch.cuda.device_count()
-    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus)
+    hfai.multiprocessing.spawn(main, args=(), nprocs=ngpus, bind_numa=True)

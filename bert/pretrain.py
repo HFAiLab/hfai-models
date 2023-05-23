@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import LambdaLR
 
 import hfai
 import hfai.distributed as dist
-from hfai.nn.parallel import DistributedDataParallel as HfaiDDP
+from haiscale.ddp import DistributedDataParallel as HfaiDDP
 from torch.nn.parallel import DistributedDataParallel as TorchDDP
 
 from bert import bert_base_MLM
@@ -148,4 +148,4 @@ def pretrain(local_rank):
 
 
 if __name__ == "__main__":
-    hfai.multiprocessing.spawn(pretrain, args=(), nprocs=torch.cuda.device_count())
+    hfai.multiprocessing.spawn(pretrain, args=(), nprocs=torch.cuda.device_count(), bind_numa=True)
