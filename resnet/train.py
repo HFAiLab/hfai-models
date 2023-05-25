@@ -105,7 +105,7 @@ def main(local_rank):
     ])  # 定义训练集变换
     train_dataset = ImageNet('train', transform=train_transform)
     train_datasampler = DistributedSampler(train_dataset)
-    train_dataloader = train_dataset.loader(batch_size, sampler=train_datasampler, num_workers=4, pin_memory=True)
+    train_dataloader = train_dataset.loader(batch_size, sampler=train_datasampler, num_workers=num_workers, pin_memory=True)
 
     val_transform = transforms.Compose([
         transforms.Resize(256),
@@ -115,10 +115,10 @@ def main(local_rank):
     ])  # 定义测试集变换
     val_dataset = ImageNet('val', transform=val_transform)
     val_datasampler = DistributedSampler(val_dataset)
-    val_dataloader = val_dataset.loader(batch_size, sampler=val_datasampler, num_workers=4, pin_memory=True)
+    val_dataloader = val_dataset.loader(batch_size, sampler=val_datasampler, num_workers=num_workers, pin_memory=True)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
+    optimizer = SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
     scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
 
     # 加载
@@ -140,7 +140,7 @@ def main(local_rank):
         start_step = 0 
         scheduler.step()
         acc = validate(val_dataloader, model, criterion, epoch, local_rank)
-        
+
         # 保存
         if rank == 0 and local_rank == 0:
             if acc > best_acc:
