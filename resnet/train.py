@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 import torch
 from torch import nn
@@ -15,11 +16,12 @@ dist.set_nccl_opt_level(dist.HFAI_NCCL_OPT_LEVEL.AUTO)
 hfai.nn.functional.set_replace_torch()
 
 
-def train(dataloader, model, criterion, optimizer, epoch, local_rank, start_step, best_acc):
+def train(dataloader, model, criterion, optimizer, scheduler, epoch, local_rank, start_step, best_acc, save_path):
     model.train()
 
     for step, batch in enumerate(dataloader):
-        step += start_step
+        if step < start_step:
+            continue
 
         samples, labels = [x.cuda(non_blocking=True) for x in batch]
         outputs = model(samples)
@@ -27,11 +29,20 @@ def train(dataloader, model, criterion, optimizer, epoch, local_rank, start_step
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-        if local_rank == 0 and step % 20 == 0:
-            print(f'Epoch: {epoch}, Step: {step}, Loss: {loss.item()}', flush=True)
 
         # 保存
-        model.try_save(epoch, step + 1, others=best_acc)
+        if dist.get_rank() == 0 and hfai.client.receive_suspend_command():
+            state = {
+                'model': model.module.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'scheduler': scheduler.state_dict(),
+                'acc': best_acc,
+                'epoch': epoch,
+                'step': step + 1
+            }
+            torch.save(state, save_path / 'latest.pt')
+            time.sleep(5)
+            hfai.client.go_suspend()
 
 
 def validate(dataloader, model, criterion, epoch, local_rank):
@@ -62,10 +73,13 @@ def validate(dataloader, model, criterion, epoch, local_rank):
 def main(local_rank):
     # 超参数设置
     epochs = 100
-    batch_size = 50
+    batch_size = 400
+    num_workers = 4
     lr = 0.1
-    save_path = 'output/resnet'
-    Path(save_path).mkdir(exist_ok=True, parents=True)
+    momentum = 0.9
+    weight_decay = 1e-4
+    save_path = Path('output/resnet_ddp')
+    save_path.mkdir(exist_ok=True, parents=True)
 
     # 多机通信
     ip = os.environ['MASTER_ADDR']
@@ -75,10 +89,7 @@ def main(local_rank):
     gpus = torch.cuda.device_count()  # 每台机器的GPU个数
 
     # world_size是全局GPU个数，rank是当前GPU全局编号
-    dist.init_process_group(backend='nccl',
-                            init_method=f'tcp://{ip}:{port}',
-                            world_size=hosts * gpus,
-                            rank=rank * gpus + local_rank)
+    dist.init_process_group(backend='nccl', init_method=f'tcp://{ip}:{port}', world_size=hosts * gpus, rank=rank * gpus + local_rank)
     torch.cuda.set_device(local_rank)
 
     # 模型、数据、优化器
@@ -90,8 +101,7 @@ def main(local_rank):
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])  # 定义训练集变换
     train_dataset = ImageNet('train', transform=train_transform)
     train_datasampler = DistributedSampler(train_dataset)
@@ -101,8 +111,7 @@ def main(local_rank):
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])  # 定义测试集变换
     val_dataset = ImageNet('val', transform=val_transform)
     val_datasampler = DistributedSampler(val_dataset)
@@ -112,9 +121,14 @@ def main(local_rank):
     optimizer = SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
     scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
 
-    ckpt_path = os.path.join(save_path, 'latest.pt')
-    start_epoch, start_step, best_acc = hfai.checkpoint.init(model, optimizer, scheduler=scheduler, ckpt_path=ckpt_path)
-    best_acc = best_acc or 0
+    # 加载
+    best_acc, start_epoch, start_step = 0, 0, 0
+    if (save_path / 'latest.pt').exists():
+        ckpt = torch.load(save_path / 'latest.pt', map_location='cpu')
+        model.module.load_state_dict(ckpt['model'])
+        optimizer.load_state_dict(ckpt['optimizer'])
+        scheduler.load_state_dict(ckpt['scheduler'])
+        best_acc, start_epoch, start_step = ckpt['acc'], ckpt['epoch'], ckpt['step']
 
     # 训练、验证
     for epoch in range(start_epoch, epochs):
@@ -122,10 +136,11 @@ def main(local_rank):
         train_datasampler.set_epoch(epoch)
         train_dataloader.set_step(start_step)
 
-        train(train_dataloader, model, criterion, optimizer, epoch, local_rank, start_step, best_acc)
-        start_step = 0  # reset
+        train(train_dataloader, model, criterion, optimizer, scheduler, epoch, local_rank, start_step, best_acc, save_path)
+        start_step = 0 
         scheduler.step()
         acc = validate(val_dataloader, model, criterion, epoch, local_rank)
+        
         # 保存
         if rank == 0 and local_rank == 0:
             if acc > best_acc:
